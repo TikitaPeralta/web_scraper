@@ -8,4 +8,9 @@ page = requests.get(URL)
 
 soup = BeautifulSoup(page.content, "html.parser")
 
-results = soup.find("img", class_="whcdn content-fill")
+results = soup.find_all("div", class_="whcdn content-fill")
+
+print(results)
+
+for res in results:
+    print(res, end="\n"*2)
