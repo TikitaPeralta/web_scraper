@@ -10,8 +10,8 @@ format:
 }
 
 - access every image independent of page
+- exclude png/svg from img finding
 - if link is found, add to list of URLs
 - iterate through list of URLs until finished
-- exclude png/svg from img finding
 - follow link for each image and download to documents/webscrape/photos file
--in JSON: res['src'], documents/webscrape/name-of-file.jpeg, res['alt'] 
+- in JSON: res['src'], documents/webscrape/name-of-file.jpeg, res['alt']
