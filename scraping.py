@@ -1,37 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
 from random import randint 
-from time import sleep 
-'''
-def img1(URL):
-    req = requests.get(URL)
-    soup = BeautifulSoup(req.content, "html.parser")
-    results = soup.find_all("a")
+from time import sleep
+import json
 
-    for res in results:
-        l = res.get('href')
-        print(l)
-        res_descendants = res.descendants
-        for d in res_descendants:
-            if d.name == 'img' and d.get('src'):
-                img0 = d['src']
-                if img0[-3:-1] != 'png' or 'svg':
-                    print('img: ', 'https://www.wikihow.com'+ img0)
-                    img1 = 'https://www.wikihow.com'+ img0
-                return img1, l
-
-def cap1(URL):
-    req = requests.get(URL)
-    soup = BeautifulSoup(req.content, "html.parser")
-    results = soup.find_all("a")
-    for res in results:
-        res_descendants = res.descendants
-        for d in res_descendants:      
-            if d.name == 'p':
-                caption = d.text
-                print('alt: ', d.text)
-                return caption
-'''            
+# main page method:
 def find_img_text_pairs(url):
     req = requests.get(url)
     soup = BeautifulSoup(req.content, "html.parser")
@@ -55,77 +28,89 @@ def find_img_text_pairs(url):
                 break
     fin = []
     for r in two_results:
-        #print(r)
         link0 = r.get('href')
         link1 = 'https://www.wikihow.com'+ link0
-        #print(link1) # imgs
         for t in r.descendants:
-            s = soup.find("div", class_="content-spacer")
-            for i in s.descendants:
-                #print(i)
-                if i.name == 'img' and i.get('src'):
-                    print(i['src'])
+            if t.name == 'img' and t.get('src'):
+                img1 = 'https://www.wikihow.com'+t['src']
+                #print(img1)
             if t.name == 'p':
-                fin.append([link1, t.text])
-                #print(t.text)
+                fin.append([link1, t.text, img1])
             
-
-    #print(f"{len(results)} vs {len(new_results)} vs {len(two_results)}")
-
-    print(fin)
     return fin
 
-
+# any other page method:
 def method2(URL):
     req = requests.get(URL)
     soup = BeautifulSoup(req.content, "html.parser")
     results1 = soup.find_all("img", alt=True, src=True)
-
+    final = []
     for res in results1:
         cap2 = res['alt']
         img2 = res['src']
-        print(img2[-4:-1])
-        if img2[-4:-1] != '.png' or '.svg':
-            print(cap2, img2, end="\n"*2)
-        return cap2, img2
+        if img2[-4:] != '.png' and img2[-4:] != '.svg':
+            final.append([cap2, img2])
+    return final
     
-def link2(URL):
+def link(URL):
     req = requests.get(URL)
     soup = BeautifulSoup(req.content, "html.parser")
     results2 = soup.find_all("a", href=True, rel=True)
+    links = []
     for r in results2:
         l = r['href']
         if l[0] == '/':
-            print('https://www.wikihow.com'+l)
-        return 'https://www.wikihow.com'+l
+            links.append('https://www.wikihow.com'+l)
+    return links
 
 
 
 url = ["https://www.wikihow.com/Main-Page/", "https://www.wikihow.com/Improve-Your-Personality"]
 done = []
 
-def scrape():
+def scrape(url, done):
     while len(url) != 0:
         for u in url:
             if u not in done:
                 done.append(u)
                 # main page method:
-                if u[-10:] != 'Main-Page/':
-                    picture1, link1 = img1(u)
-                    caption1 = cap1(u)
+                if u[-10:] == 'Main-Page/':
+                    res = find_img_text_pairs(u)
+                    for r in res:
+                        link1 = r[0]
+                        caption1 = r[1]
+                        picture1 = r[2]
                     #if link1 not in done:
                     #    url.append(link1)
-                    print('caption1: ', caption1, 'picture1: ', picture1)
+                        print('link1: ', link1, ' | caption1: ', caption1, ' | picture1: ', picture1)
+                        data = {
+                            'caption' : f"{caption1}",
+                            'imgLink' : f'{picture1}',
+                            'path' : f'Documents/CodingProjects/wikihowImg/{picture1}'
+                        }
+                        with open("./jsonFile.txt", "w") as file:
+                            json_data = json.dump(data, file)
+                            print(json_data)
                 else:
-                    caption2, picture2 = method2(u)
-                    #l = link2(u)
+                    res1 = method2(u)
+                    r = []
+                    links = []
+                    for i in res1:
+                        caption2 = i[0]
+                        if i[1][:23] == 'https://www.wikihow.com':
+                            picture2 = i[1]
+                        else:
+                            picture2 = 'https://www.wikihow.com' + i[1]
+                        r.append([caption2, picture2])
+                        #print('caption2: ', caption2, ' | picture2: ', picture2)
+                    #print(r)
+                    l = link(u)
+                    #print(l)
                     #if l not in done:
                     #    url.append(l)
-                    print('caption2: ', caption2, 'picture2: ', picture2)
+                    #print('link2: ', l, ' | caption2: ', caption2, ' | picture2: ', picture2)
 
 #scrape()
     #sleep(randint(2,10))
 
-URL = "https://www.wikihow.com/Main-Page/"
-pairs = find_img_text_pairs(URL)
-print(pairs)
+scrape(url, done)
