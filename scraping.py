@@ -1,8 +1,12 @@
 import requests
+import urllib.request
+from pathlib import Path
+import os
 from bs4 import BeautifulSoup
 from random import randint 
 from time import sleep
 import json
+from PIL import Image
 
 # main page method:
 def find_img_text_pairs(url):
@@ -80,6 +84,7 @@ def scrape(url, done):
                         link1 = r[0]
                         caption1 = r[1]
                         picture1 = r[2]
+                        
                     #if link1 not in done:
                     #    url.append(link1)
                         print('link1: ', link1, ' | caption1: ', caption1, ' | picture1: ', picture1)
@@ -91,6 +96,10 @@ def scrape(url, done):
                         with open("./jsonFile.txt", "w") as file:
                             json_data = json.dump(data, file)
                             print(json_data)
+                    img_url = picture1
+                    urllib.request.urlretrieve(img_url, '/home/tikitaperalta/wikihowImgs/wikihow.jpeg')
+                    my_img = Image.open('wikihow.jpeg')
+                    my_img.show()
                 else:
                     res1 = method2(u)
                     r = []
@@ -114,3 +123,6 @@ def scrape(url, done):
     #sleep(randint(2,10))
 
 scrape(url, done)
+
+#path = os.getcwd()
+#print(path)
