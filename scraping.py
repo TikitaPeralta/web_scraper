@@ -78,6 +78,9 @@ def scrape(url, done):
         for u in url:
             if u not in done:
                 done.append(u)
+                url.remove(u)
+                print('url: ', url, ' | done: ', done)
+                sleep(randint(2,10))
                 # main page method:
                 if u[-10:] == 'Main-Page/':
                     res = find_img_text_pairs(u)
@@ -86,8 +89,8 @@ def scrape(url, done):
                         link1 = r[0]
                         caption1 = r[1]
                         picture1 = r[2]
-                    #if link1 not in done:
-                    #    url.append(link1)
+                    if link1 not in done:
+                        url.append(link1)
                         cap_img.append([caption1, picture1])
                     data = []
                     for index, item in enumerate(cap_img):
@@ -102,25 +105,25 @@ def scrape(url, done):
                         }
                         data.append(d)
                         with open("./jsonFile.txt", "w") as file:
-                            pass
-                            #json_data = json.dump(data, file)
-                            #print(json_data)
+                            json_data = json.dump(data, file)
+                            print(json_data)
                         try:
                             response = requests.get(item[1])
                             file_name = item[1].split('/')[-1]
                             file_path = os.path.join('wikihowImgs', file_name)
                             if response.status_code == 200:
                                 with open(file_path, 'wb') as f:
-                                    pass
-                                    #f.write(response.content)
+                                    f.write(response.content)
                             else:
                                 print(f"Failed to download the image. Status code: {response.status_code}")
                         except Exception as e:
                             print(f"An error occurred: {e}")
                 else:
                     res1 = method2(u)
+                    l = link(u)
+                    if l not in done:
+                        url.append(l)
                     r = []
-                    links = []
                     for i in res1:
                         caption2 = i[0]
                         if i[1][:23] == 'https://www.wikihow.com':
@@ -128,7 +131,6 @@ def scrape(url, done):
                         else:
                             picture2 = 'https://www.wikihow.com' + i[1]
                         r.append([caption2, picture2])
-                    print(r)
                     data2 = []
                     for ind, ite in enumerate(r):
                         d2 = {
@@ -150,19 +152,11 @@ def scrape(url, done):
                             file_path = os.path.join('wikihowImgs', file_name)
                             if response.status_code == 200:
                                 with open(file_path, 'wb') as f:
-                                    pass
-                                    #f.write(response.content)
+                                    f.write(response.content)
                             else:
                                 print(f"Failed to download the image. Status code: {response.status_code}")
                         except Exception as e:
                             print(f"An error occurred: {e}")
-                    l = link(u)
-                    #print(l)
-                    #if l not in done:
-                    #    url.append(l)
-
-
-#sleep(randint(2,10))
 
 scrape(url, done)
 
