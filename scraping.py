@@ -1,6 +1,7 @@
 import requests
 import urllib.request
 from pathlib import Path
+import pathlib
 import os
 from bs4 import BeautifulSoup
 from random import randint 
@@ -80,26 +81,42 @@ def scrape(url, done):
                 # main page method:
                 if u[-10:] == 'Main-Page/':
                     res = find_img_text_pairs(u)
+                    cap_img = []
                     for r in res:
                         link1 = r[0]
                         caption1 = r[1]
                         picture1 = r[2]
-                        
                     #if link1 not in done:
                     #    url.append(link1)
-                        print('link1: ', link1, ' | caption1: ', caption1, ' | picture1: ', picture1)
-                        data = {
-                            'caption' : f"{caption1}",
-                            'imgLink' : f'{picture1}',
-                            'path' : f'Documents/CodingProjects/wikihowImg/{picture1}'
+                        cap_img.append([caption1, picture1])
+                    data = []
+                    for index, item in enumerate(cap_img):
+                        d = {
+                            f'id {index}' : [
+                                {
+                            'caption' : f"{item[0]}",
+                            'imgLink' : f'{item[1]}',
+                            'path' : f'/home/tikitaperalta/web_scraper/wikihowImgs/{item[1]}'
+                                }
+                            ]
                         }
+                        data.append(d)
                         with open("./jsonFile.txt", "w") as file:
-                            json_data = json.dump(data, file)
-                            print(json_data)
-                    img_url = picture1
-                    urllib.request.urlretrieve(img_url, '/home/tikitaperalta/wikihowImgs/wikihow.jpeg')
-                    my_img = Image.open('wikihow.jpeg')
-                    my_img.show()
+                            pass
+                            #json_data = json.dump(data, file)
+                            #print(json_data)
+                        try:
+                            response = requests.get(item[1])
+                            file_name = item[1].split('/')[-1]
+                            file_path = os.path.join('wikihowImgs', file_name)
+                            if response.status_code == 200:
+                                with open(file_path, 'wb') as f:
+                                    pass
+                                    #f.write(response.content)
+                            else:
+                                print(f"Failed to download the image. Status code: {response.status_code}")
+                        except Exception as e:
+                            print(f"An error occurred: {e}")
                 else:
                     res1 = method2(u)
                     r = []
@@ -111,16 +128,41 @@ def scrape(url, done):
                         else:
                             picture2 = 'https://www.wikihow.com' + i[1]
                         r.append([caption2, picture2])
-                        #print('caption2: ', caption2, ' | picture2: ', picture2)
-                    #print(r)
+                    print(r)
+                    data2 = []
+                    for ind, ite in enumerate(r):
+                        d2 = {
+                            f'id {ind}' : [
+                                {
+                            'caption' : f"{ite[0]}",
+                            'imgLink' : f'{ite[1]}',
+                            'path' : f'/home/tikitaperalta/web_scraper/wikihowImgs/{ite[1]}'
+                                }
+                            ]
+                        }
+                        data2.append(d2)
+                        with open("./jsonFile.txt", "w") as file:
+                            json_data2 = json.dump(data2, file)
+                            print(json_data2)
+                        try:
+                            response = requests.get(ite[1])
+                            file_name = ite[1].split('/')[-1]
+                            file_path = os.path.join('wikihowImgs', file_name)
+                            if response.status_code == 200:
+                                with open(file_path, 'wb') as f:
+                                    pass
+                                    #f.write(response.content)
+                            else:
+                                print(f"Failed to download the image. Status code: {response.status_code}")
+                        except Exception as e:
+                            print(f"An error occurred: {e}")
                     l = link(u)
                     #print(l)
                     #if l not in done:
                     #    url.append(l)
-                    #print('link2: ', l, ' | caption2: ', caption2, ' | picture2: ', picture2)
 
-#scrape()
-    #sleep(randint(2,10))
+
+#sleep(randint(2,10))
 
 scrape(url, done)
 
