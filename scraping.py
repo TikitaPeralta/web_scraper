@@ -121,8 +121,9 @@ def scrape(url, done):
                 else:
                     res1 = method2(u)
                     l = link(u)
-                    if l not in done:
-                        url.append(l)
+                    for single_url in l:
+                        if single_url not in done:
+                            url.append(single_url)
                     r = []
                     for i in res1:
                         caption2 = i[0]
